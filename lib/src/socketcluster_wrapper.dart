@@ -1,13 +1,12 @@
 part of flutter_bloc_devtools;
 
 class SocketClusterWrapper {
-  socket_cc.Socket _socket;
+  late socket_cc.Socket _socket;
   Function socketFactory;
   String url;
 
   SocketClusterWrapper(this.url,
-      {this.socketFactory = socket_cc.Socket.connect})
-      : _socket = socketFactory(url);
+      {this.socketFactory = socket_cc.Socket.connect});
 
   Future<void> connect() async {
     _socket = await socketFactory(url);

@@ -160,7 +160,7 @@ class RemoteDevToolsObserver extends BlocObserver {
   void onClose(BlocBase bloc) {
     super.onClose(bloc);
     if (status == RemoteDevToolsStatus.started) {
-      _relay('ACTION', bloc, "CLOSING", 'OnClose');
+      _relay('ACTION', bloc, 'CLOSING', 'OnClose');
     }
   }
 
