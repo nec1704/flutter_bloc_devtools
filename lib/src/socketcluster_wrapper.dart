@@ -14,6 +14,7 @@ class SocketClusterWrapper {
 
   socket_cc.Emitter on(String event, Function func) {
     print('Emitter: event: $event \n func: $func');
+
     return _socket.on(event, func);
   }
 
