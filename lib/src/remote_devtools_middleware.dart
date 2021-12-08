@@ -55,7 +55,7 @@ class RemoteDevToolsObserver extends BlocObserver {
   Future<void> connect() async {
     _status = RemoteDevToolsStatus.connecting;
     print('trying to connect to socket at $_host');
-    await socket!.connect();
+    await socket.connect();
     _status = RemoteDevToolsStatus.connected;
     print('connected to socket at $_host');
     _channel = await _login();
@@ -66,7 +66,7 @@ class RemoteDevToolsObserver extends BlocObserver {
 
   Future<String> _login() {
     final c = Completer<String>();
-    socket!.emit('login', 'master', (String name, dynamic error, dynamic data) {
+    socket.emit('login', 'master', (String name, dynamic error, dynamic data) {
       c.complete(data as String?);
     });
     return c.future;
@@ -74,7 +74,7 @@ class RemoteDevToolsObserver extends BlocObserver {
 
   Future<dynamic> _waitForStart() {
     final c = Completer();
-    socket!.on(_channel, (String name, dynamic data) {
+    socket.on(_channel, (String name, dynamic data) {
       if (data['type'] == 'START') {
         _status = RemoteDevToolsStatus.started;
         c.complete();
@@ -110,7 +110,7 @@ class RemoteDevToolsObserver extends BlocObserver {
 
   void _relay(String type,
       [BlocBase? bloc, Object? state, dynamic action, String? nextActionId]) {
-    final message = {'type': type, 'id': socket!.id, 'name': instanceName};
+    final message = {'type': type, 'id': socket.id, 'name': instanceName};
     final blocName = _getBlocName(bloc);
 
     if (state != null) {
@@ -137,7 +137,7 @@ class RemoteDevToolsObserver extends BlocObserver {
     } else if (action != null) {
       message['action'] = action as String;
     }
-    socket!.emit(socket!.id != null ? 'log' : 'log-noid', message);
+    socket.emit(socket.id != null ? 'log' : 'log-noid', message);
   }
 
   @override
