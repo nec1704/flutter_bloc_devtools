@@ -30,7 +30,7 @@ class RemoteDevToolsObserver extends BlocObserver {
   /// example.lan:8000
   ///
   final String _host;
-  SocketClusterWrapper? socket;
+  late SocketClusterWrapper socket;
   late String _channel;
   RemoteDevToolsStatus _status = RemoteDevToolsStatus.notConnected;
 
@@ -41,15 +41,14 @@ class RemoteDevToolsObserver extends BlocObserver {
 
   /// The name that will appear in Instance Name in Dev Tools. If not specified,
   /// default to 'flutter'.
-  String? instanceName;
+  late String instanceName;
 
   RemoteDevToolsObserver(
     this._host, {
-    this.socket,
-    this.instanceName,
-  }) {
-    socket ??= SocketClusterWrapper('ws://$_host/socketcluster/');
-    instanceName ??= 'flutter';
+    socket,
+    instanceName,
+  })  : socket = SocketClusterWrapper('ws://$_host/socketcluster/'),
+        instanceName = 'flutter' {
     connect();
   }
 
@@ -161,7 +160,7 @@ class RemoteDevToolsObserver extends BlocObserver {
   void onClose(BlocBase bloc) {
     super.onClose(bloc);
     if (status == RemoteDevToolsStatus.started) {
-      _relay('ACTION', bloc, null, 'OnClose');
+      _relay('ACTION', bloc, "CLOSING", 'OnClose');
     }
   }
 
