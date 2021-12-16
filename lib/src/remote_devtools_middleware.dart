@@ -26,8 +26,8 @@ class RemoteDevToolsObserver extends BlocObserver {
   /// example.lan:8000
   ///
   final String _host;
-  SocketClusterWrapper socket;
-  String _channel;
+  late SocketClusterWrapper socket;
+  late String _channel;
   RemoteDevToolsStatus _status = RemoteDevToolsStatus.notConnected;
 
   RemoteDevToolsStatus get status => _status;
@@ -37,15 +37,15 @@ class RemoteDevToolsObserver extends BlocObserver {
 
   /// The name that will appear in Instance Name in Dev Tools. If not specified,
   /// default to 'flutter'.
-  String instanceName;
+  late String instanceName;
 
   RemoteDevToolsObserver(
     this._host, {
-    this.socket,
-    this.instanceName,
+    SocketClusterWrapper? socket,
+    String? instanceName,
   }) {
-    socket ??= SocketClusterWrapper('ws://$_host/socketcluster/');
-    instanceName ??= 'flutter';
+    this.socket = socket ?? SocketClusterWrapper('ws://$_host/socketcluster/');
+    this.instanceName = instanceName ?? 'flutter';
     connect();
   }
 
@@ -57,7 +57,7 @@ class RemoteDevToolsObserver extends BlocObserver {
     print('connected to socket at $_host');
     _channel = await _login();
     _status = RemoteDevToolsStatus.starting;
-    _relay('START');
+    // _relay('START');
     await _waitForStart();
   }
 
@@ -86,27 +86,27 @@ class RemoteDevToolsObserver extends BlocObserver {
     final blocName = bloc.runtimeType.toString();
     final blocHash = bloc.hashCode;
     if (_blocs.containsKey(blocName)) {
-      if (!_blocs[blocName].containsKey(blocHash)) {
-        _blocs[blocName][blocHash] =
-            '$blocName-${_blocs[blocName].keys.length}';
+      if (!_blocs[blocName]!.containsKey(blocHash)) {
+        _blocs[blocName]![blocHash] =
+            '$blocName-${_blocs[blocName]!.keys.length}';
       }
     } else {
       _blocs[blocName] = {blocHash: blocName};
     }
-    return _blocs[blocName][blocHash];
+    return _blocs[blocName]![blocHash]!;
   }
 
   void _removeBlocName(BlocBase bloc) {
     final blocName = bloc.runtimeType.toString();
     final blocHash = bloc.hashCode;
     if (_blocs.containsKey(blocName) &&
-        _blocs[blocName].containsKey(blocHash)) {
-      _blocs[blocName].remove(blocHash);
+        _blocs[blocName]!.containsKey(blocHash)) {
+      _blocs[blocName]!.remove(blocHash);
     }
   }
 
   void _relay(String type,
-      [BlocBase bloc, Object state, dynamic action, String nextActionId]) {
+      BlocBase bloc, Object? state, dynamic action, String? nextActionId) {
     final message = {'type': type, 'id': socket.id, 'name': instanceName};
     final blocName = _getBlocName(bloc);
 
@@ -131,10 +131,10 @@ class RemoteDevToolsObserver extends BlocObserver {
   }
 
   @override
-  void onTransition(BlocBase bloc, Transition transition) {
+  void onTransition(Bloc bloc, Transition transition) {
     super.onTransition(bloc, transition);
     if (status == RemoteDevToolsStatus.started) {
-      _relay('ACTION', bloc, transition.nextState, transition.event);
+      _relay('ACTION', bloc, transition.nextState, transition.event, null);
     }
   }
 
@@ -142,7 +142,7 @@ class RemoteDevToolsObserver extends BlocObserver {
   void onCreate(BlocBase bloc) {
     super.onCreate(bloc);
     if (status == RemoteDevToolsStatus.started) {
-      _relay('ACTION', bloc, bloc.state, 'OnCreate');
+      _relay('ACTION', bloc, bloc.state, 'OnCreate', null);
     }
   }
 
@@ -150,11 +150,11 @@ class RemoteDevToolsObserver extends BlocObserver {
   void onClose(BlocBase bloc) {
     super.onClose(bloc);
     if (status == RemoteDevToolsStatus.started) {
-      _relay('ACTION', bloc, null, 'OnClose');
+      _relay('ACTION', bloc, null, 'OnClose', null);
     }
   }
 
-  Object _maybeToJson(dynamic object) {
+  Object? _maybeToJson(dynamic object) {
     try {
       return object.toJson();
     } on NoSuchMethodError {
@@ -162,7 +162,7 @@ class RemoteDevToolsObserver extends BlocObserver {
     }
   }
 
-  String _actionEncode(Object action) {
+  String? _actionEncode(Object? action) {
     if (action == null) {
       return null;
     }
