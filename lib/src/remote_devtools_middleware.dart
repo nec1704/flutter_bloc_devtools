@@ -46,7 +46,6 @@ class RemoteDevToolsObserver extends BlocObserver {
   }) {
     this.socket = socket ?? SocketClusterWrapper('ws://$_host/socketcluster/');
     this.instanceName = instanceName ?? 'flutter';
-    connect();
   }
 
   Future<void> connect() async {
