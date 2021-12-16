@@ -57,6 +57,7 @@ class RemoteDevToolsObserver extends BlocObserver {
     print('connected to socket at $_host');
     _channel = await _login();
     _status = RemoteDevToolsStatus.starting;
+    _relayStart();
     // _relay('START');
     await _waitForStart();
   }
@@ -103,6 +104,11 @@ class RemoteDevToolsObserver extends BlocObserver {
         _blocs[blocName]!.containsKey(blocHash)) {
       _blocs[blocName]!.remove(blocHash);
     }
+  }
+
+  void _relayStart() {
+    final message = {'type': 'START', 'id': socket.id, 'name': instanceName};
+    socket.emit(socket.id != null ? 'log' : 'log-noid', message);
   }
 
   void _relay(String type,
